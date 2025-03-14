@@ -5,18 +5,17 @@ import ContractCard, { ContractMetadata } from "@/components/ContractCard";
 import ContractMetadataForm from "@/components/ContractMetadataForm";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-// Sample data based on the image
+// Sample data with ".sol" removed from names
 const SAMPLE_CONTRACTS: ContractMetadata[] = [
   {
     id: "1",
     name: "FilmRights",
-    extension: ".sol",
+    extension: "",
     purpose: "Manages ownership of IP, assigns revenue shares",
     keyFunctions: ["Assigns ownership", "Records rights", "Facilitates transfers"],
     createdAt: new Date("2023-01-15"),
@@ -25,7 +24,7 @@ const SAMPLE_CONTRACTS: ContractMetadata[] = [
   {
     id: "2",
     name: "RevenueSplit",
-    extension: ".sol",
+    extension: "",
     purpose: "Automates revenue sharing among investors, creators, and stakeholders",
     keyFunctions: ["Distributes income", "Handles multiple revenue streams"],
     createdAt: new Date("2023-02-10"),
@@ -34,7 +33,7 @@ const SAMPLE_CONTRACTS: ContractMetadata[] = [
   {
     id: "3",
     name: "Investment",
-    extension: ".sol",
+    extension: "",
     purpose: "Enables tokenized film investment",
     keyFunctions: ["Tracks contributions", "Issues film-backed tokens", "Automates investor payouts"],
     createdAt: new Date("2023-03-05"),
@@ -43,7 +42,7 @@ const SAMPLE_CONTRACTS: ContractMetadata[] = [
   {
     id: "4",
     name: "Licensing",
-    extension: ".sol",
+    extension: "",
     purpose: "Automates film licensing and royalty payments",
     keyFunctions: ["Issues licenses", "Enforces royalties on distribution"],
     createdAt: new Date("2023-04-12"),
@@ -52,7 +51,7 @@ const SAMPLE_CONTRACTS: ContractMetadata[] = [
   {
     id: "5",
     name: "StreamingPayouts",
-    extension: ".sol",
+    extension: "",
     purpose: "Connects to streaming platforms to process per-view revenue distribution",
     keyFunctions: ["Reads external streaming data", "Executes micropayments"],
     createdAt: new Date("2023-05-20"),
@@ -64,9 +63,7 @@ const Index = () => {
   const { toast } = useToast();
   const [contracts, setContracts] = useState<ContractMetadata[]>(SAMPLE_CONTRACTS);
   const [isCreating, setIsCreating] = useState(false);
-  const [isEditing, setIsEditing] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [viewContract, setViewContract] = useState<ContractMetadata | null>(null);
   const [activeTab, setActiveTab] = useState("all");
 
@@ -81,47 +78,19 @@ const Index = () => {
   });
 
   const handleSave = (data: Omit<ContractMetadata, "id" | "createdAt" | "updatedAt">) => {
-    if (isEditing) {
-      // Update existing contract
-      setContracts(prev => 
-        prev.map(contract => 
-          contract.id === isEditing 
-            ? { 
-                ...contract, 
-                ...data, 
-                updatedAt: new Date() 
-              } 
-            : contract
-        )
-      );
-      setIsEditing(null);
-      toast({
-        title: "Contract updated",
-        description: `${data.name}${data.extension} has been updated successfully.`,
-      });
-    } else {
-      // Create new contract
-      const newContract: ContractMetadata = {
-        id: Date.now().toString(),
-        ...data,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-      setContracts(prev => [...prev, newContract]);
-      setIsCreating(false);
-      toast({
-        title: "Contract created",
-        description: `${data.name}${data.extension} has been created successfully.`,
-      });
-    }
-  };
-
-  const handleEdit = (id: string) => {
-    setIsEditing(id);
-  };
-
-  const handleDelete = (id: string) => {
-    setDeleteConfirm(id);
+    // Create new contract
+    const newContract: ContractMetadata = {
+      id: Date.now().toString(),
+      ...data,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    setContracts(prev => [...prev, newContract]);
+    setIsCreating(false);
+    toast({
+      title: "Contract created",
+      description: `${data.name}${data.extension} has been created successfully.`,
+    });
   };
 
   const handleView = (id: string) => {
@@ -131,23 +100,8 @@ const Index = () => {
     }
   };
 
-  const confirmDelete = () => {
-    if (deleteConfirm) {
-      const contractToDelete = contracts.find(c => c.id === deleteConfirm);
-      setContracts(prev => prev.filter(contract => contract.id !== deleteConfirm));
-      setDeleteConfirm(null);
-      
-      if (contractToDelete) {
-        toast({
-          title: "Contract deleted",
-          description: `${contractToDelete.name}${contractToDelete.extension} has been deleted.`,
-        });
-      }
-    }
-  };
-
   const getUniqueExtensions = () => {
-    const extensions = contracts.map(c => c.extension);
+    const extensions = contracts.map(c => c.extension).filter(ext => ext !== "");
     return Array.from(new Set(extensions));
   };
 
@@ -162,23 +116,6 @@ const Index = () => {
         </div>
       </div>
     );
-  }
-
-  if (isEditing) {
-    const contractToEdit = contracts.find(c => c.id === isEditing);
-    if (contractToEdit) {
-      return (
-        <div className="min-h-screen bg-background">
-          <div className="container py-8">
-            <ContractMetadataForm
-              initialData={contractToEdit}
-              onSave={handleSave}
-              onCancel={() => setIsEditing(null)}
-            />
-          </div>
-        </div>
-      );
-    }
   }
 
   return (
@@ -215,8 +152,6 @@ const Index = () => {
               <ContractCard
                 key={contract.id}
                 contract={contract}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
                 onView={handleView}
               />
             ))}
@@ -234,29 +169,11 @@ const Index = () => {
         )}
       </main>
       
-      <AlertDialog open={!!deleteConfirm} onOpenChange={(open) => !open && setDeleteConfirm(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the contract
-              metadata and remove it from the database.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} className="bg-destructive">
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-      
       <Dialog open={!!viewContract} onOpenChange={(open) => !open && setViewContract(null)}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle className="text-xl mb-4">
-              {viewContract?.name}{viewContract?.extension}
+              {viewContract?.name}
             </DialogTitle>
           </DialogHeader>
           
@@ -279,18 +196,6 @@ const Index = () => {
               <div className="flex justify-between text-sm text-muted-foreground">
                 <span>Created: {new Date(viewContract.createdAt).toLocaleDateString()}</span>
                 <span>Last updated: {new Date(viewContract.updatedAt).toLocaleDateString()}</span>
-              </div>
-              
-              <div className="flex justify-end gap-2 pt-4">
-                <Button 
-                  variant="outline" 
-                  onClick={() => {
-                    handleEdit(viewContract.id);
-                    setViewContract(null);
-                  }}
-                >
-                  Edit
-                </Button>
               </div>
             </div>
           )}

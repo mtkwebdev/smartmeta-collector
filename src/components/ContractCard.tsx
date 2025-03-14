@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Trash2, Download, Eye } from "lucide-react";
+import { Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIntersectionObserver } from "./animations";
 
@@ -20,16 +20,12 @@ export interface ContractMetadata {
 
 interface ContractCardProps {
   contract: ContractMetadata;
-  onEdit?: (id: string) => void;
-  onDelete?: (id: string) => void;
   onView?: (id: string) => void;
   className?: string;
 }
 
 const ContractCard = ({
   contract,
-  onEdit,
-  onDelete,
   onView,
   className,
 }: ContractCardProps) => {
@@ -101,22 +97,6 @@ const ContractCard = ({
           className="h-8 px-2"
         >
           <Eye size={16} className="mr-1" /> View
-        </Button>
-        <Button 
-          size="sm" 
-          variant="ghost" 
-          onClick={() => onEdit?.(contract.id)}
-          className="h-8 px-2"
-        >
-          <Edit size={16} className="mr-1" /> Edit
-        </Button>
-        <Button 
-          size="sm" 
-          variant="ghost" 
-          onClick={() => onDelete?.(contract.id)}
-          className="h-8 px-2 text-destructive hover:text-destructive hover:bg-destructive/10"
-        >
-          <Trash2 size={16} className="mr-1" /> Delete
         </Button>
       </CardFooter>
     </Card>
