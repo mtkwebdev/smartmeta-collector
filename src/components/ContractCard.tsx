@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,6 +15,7 @@ export interface ContractMetadata {
   keyFunctions: string[];
   createdAt: Date;
   updatedAt: Date;
+  contractData?: any; // Adding the missing contractData property
 }
 
 interface ContractCardProps {
