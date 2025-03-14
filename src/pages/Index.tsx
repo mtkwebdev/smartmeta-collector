@@ -1,9 +1,9 @@
-
 import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import ContractCard, { ContractMetadata } from "@/components/ContractCard";
 import ContractMetadataForm from "@/components/ContractMetadataForm";
 import ContractForm from "@/components/ContractForm";
+import ContractDetails from "@/components/ContractDetails";
 import { CONTRACT_TYPE_CONFIGS } from "@/components/ContractFormFields";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
@@ -61,6 +61,72 @@ const SAMPLE_CONTRACTS: ContractMetadata[] = [
   },
 ];
 
+// Sample Film Rights contract metadata for the ContractDetails view
+const FILM_RIGHTS_METADATA = {
+  "title": "FilmRights",
+  "version": "1.0.0",
+  "description": "Smart contract for managing film IP ownership and revenue share distribution",
+  "contractProperties": {
+    "film": {
+      "filmId": "string",
+      "title": "string",
+      "description": "string",
+      "creationDate": "uint256",
+      "contentHash": "bytes32"
+    },
+    "rightsOwnership": {
+      "primaryRightsHolder": "address",
+      "transferable": "bool",
+      "licensingEnabled": "bool",
+      "territorialRestrictions": "string[]"
+    },
+    "revenueShares": {
+      "stakeholder": "address",
+      "sharePercentage": "uint256",
+      "stakeholderRole": "string",
+      "lockupPeriod": "uint256",
+      "vestingSchedule": "uint256[]"
+    }
+  },
+  "events": {
+    "RightsTransferred": {
+      "previousOwner": "address",
+      "newOwner": "address",
+      "transferDate": "uint256"
+    },
+    "RevenueDistributed": {
+      "totalAmount": "uint256",
+      "distributionDate": "uint256",
+      "recipients": "address[]",
+      "amounts": "uint256[]"
+    },
+    "LicenseGranted": {
+      "licenseId": "uint256",
+      "licensee": "address",
+      "licenseType": "string",
+      "startDate": "uint256",
+      "endDate": "uint256",
+      "territorialScope": "string[]"
+    }
+  },
+  "functions": {
+    "registerFilm": "Function to register a new film's IP",
+    "transferRights": "Function to transfer ownership rights",
+    "assignRevenueShare": "Function to assign percentage of revenue to stakeholders",
+    "distributeRevenue": "Function to distribute revenue according to shares",
+    "grantLicense": "Function to grant usage license to third parties",
+    "revokeLicense": "Function to revoke previously granted licenses",
+    "getRightsOwner": "Function to query the current rights owner",
+    "getStakeholderShares": "Function to query revenue share allocation"
+  },
+  "standards": ["ERC-721", "ERC-1155"],
+  "dependencies": {
+    "OpenZeppelin": ">=4.0.0",
+    "Chainlink": ">=1.0.0"
+  },
+  "chainSupport": ["Ethereum", "Polygon", "Binance Smart Chain"]
+};
+
 const Index = () => {
   const { toast } = useToast();
   const [contracts, setContracts] = useState<ContractMetadata[]>(SAMPLE_CONTRACTS);
@@ -81,7 +147,6 @@ const Index = () => {
   });
 
   const handleSaveMetadata = (data: Omit<ContractMetadata, "id" | "createdAt" | "updatedAt">) => {
-    // Create new contract with metadata only
     const newContract: ContractMetadata = {
       id: Date.now().toString(),
       ...data,
@@ -97,10 +162,8 @@ const Index = () => {
   };
   
   const handleDeployContract = (data: any) => {
-    // Extract metadata for the contract card
     const { name, purpose, extension, keyFunctions, type } = data;
     
-    // Create new contract with full data
     const newContract: ContractMetadata = {
       id: Date.now().toString(),
       name: name || type,
@@ -109,7 +172,6 @@ const Index = () => {
       keyFunctions: keyFunctions || [],
       createdAt: new Date(),
       updatedAt: new Date(),
-      // Store the full contract data
       contractData: data,
     };
     
@@ -124,7 +186,14 @@ const Index = () => {
   const handleView = (id: string) => {
     const contract = contracts.find(c => c.id === id);
     if (contract) {
-      setViewContract(contract);
+      if (contract.name === "FilmRights" && !contract.contractData) {
+        setViewContract({
+          ...contract,
+          contractData: FILM_RIGHTS_METADATA
+        });
+      } else {
+        setViewContract(contract);
+      }
     }
   };
 
@@ -221,45 +290,38 @@ const Index = () => {
       </main>
       
       <Dialog open={!!viewContract} onOpenChange={(open) => !open && setViewContract(null)}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-xl mb-4">
+            <DialogTitle className="text-xl">
               {viewContract?.name}
             </DialogTitle>
           </DialogHeader>
           
           {viewContract && (
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-sm font-medium text-muted-foreground mb-1">Purpose</h3>
-                <p>{viewContract.purpose}</p>
-              </div>
-              
-              <div>
-                <h3 className="text-sm font-medium text-muted-foreground mb-1">Key Functions</h3>
-                <ul className="list-disc pl-5 space-y-1">
-                  {viewContract.keyFunctions.map((func, index) => (
-                    <li key={index}>{func}</li>
-                  ))}
-                </ul>
-              </div>
-              
-              {viewContract.contractData && (
+            viewContract.contractData ? (
+              <ContractDetails contractData={viewContract.contractData} />
+            ) : (
+              <div className="space-y-4">
                 <div>
-                  <h3 className="text-sm font-medium text-muted-foreground mb-1">Contract Data</h3>
-                  <div className="bg-muted p-4 rounded-md">
-                    <pre className="text-xs overflow-auto whitespace-pre-wrap">
-                      {JSON.stringify(viewContract.contractData, null, 2)}
-                    </pre>
-                  </div>
+                  <h3 className="text-sm font-medium text-muted-foreground mb-1">Purpose</h3>
+                  <p>{viewContract.purpose}</p>
                 </div>
-              )}
-              
-              <div className="flex justify-between text-sm text-muted-foreground">
-                <span>Deployed: {new Date(viewContract.createdAt).toLocaleDateString()}</span>
-                <span>Last updated: {new Date(viewContract.updatedAt).toLocaleDateString()}</span>
+                
+                <div>
+                  <h3 className="text-sm font-medium text-muted-foreground mb-1">Key Functions</h3>
+                  <ul className="list-disc pl-5 space-y-1">
+                    {viewContract.keyFunctions.map((func, index) => (
+                      <li key={index}>{func}</li>
+                    ))}
+                  </ul>
+                </div>
+                
+                <div className="flex justify-between text-sm text-muted-foreground">
+                  <span>Deployed: {new Date(viewContract.createdAt).toLocaleDateString()}</span>
+                  <span>Last updated: {new Date(viewContract.updatedAt).toLocaleDateString()}</span>
+                </div>
               </div>
-            </div>
+            )
           )}
         </DialogContent>
       </Dialog>
