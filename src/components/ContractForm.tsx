@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, Rocket } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import ContractFormFields, { CONTRACT_TYPE_CONFIGS } from "./ContractFormFields";
 import { ContractMetadata } from "./ContractCard";
@@ -34,7 +34,6 @@ const ContractForm = ({
   const handleContractTypeChange = (type: string) => {
     setActiveTab(type as keyof typeof CONTRACT_TYPE_CONFIGS);
     
-    // Keep only the metadata fields when changing contract type
     const { name, purpose, extension, keyFunctions } = formData;
     setFormData({ 
       name, 
@@ -52,7 +51,6 @@ const ContractForm = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate required fields
     const config = CONTRACT_TYPE_CONFIGS[activeTab];
     const requiredFields = config.fields
       .filter(field => field.required)
@@ -69,27 +67,24 @@ const ContractForm = ({
       return;
     }
     
-    // Add contract type and metadata
     const contractData = {
       ...formData,
       type: activeTab,
-      // Add metadata for contract card
       name: formData.name || config.title,
       purpose: formData.purpose || config.description,
-      extension: ".sol",
+      extension: "",
       keyFunctions: formData.keyFunctions || [],
     };
     
     onSave(contractData);
     
     toast({
-      title: "Contract saved",
-      description: "Your contract has been saved successfully.",
+      title: "Contract deployed",
+      description: "Your contract has been deployed successfully.",
     });
   };
   
   const handleCancel = () => {
-    // Check if there are unsaved changes
     if (Object.keys(formData).length > 0) {
       setConfirmCancel(true);
     } else {
@@ -116,7 +111,7 @@ const ContractForm = ({
                 <ArrowLeft size={16} />
               </Button>
               <CardTitle className="text-xl">
-                {initialData ? "Edit Contract" : "Create New Contract"}
+                {initialData ? "Edit Contract" : "Deploy New Contract"}
               </CardTitle>
             </div>
           </CardHeader>
@@ -160,8 +155,8 @@ const ContractForm = ({
               type="submit"
               className="bg-accent hover:bg-accent/90"
             >
-              <Save size={16} className="mr-1.5" />
-              Save Contract
+              <Rocket size={16} className="mr-1.5" />
+              Deploy Contract
             </Button>
           </CardFooter>
         </form>

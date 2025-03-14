@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import ContractCard, { ContractMetadata } from "@/components/ContractCard";
@@ -7,7 +8,7 @@ import { CONTRACT_TYPE_CONFIGS } from "@/components/ContractFormFields";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Search, Plus } from "lucide-react";
+import { Search, Plus, Rocket } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -16,7 +17,7 @@ const SAMPLE_CONTRACTS: ContractMetadata[] = [
   {
     id: "1",
     name: "FilmRights",
-    extension: ".sol",
+    extension: "",
     purpose: "Manages ownership of IP, assigns revenue shares",
     keyFunctions: ["Assigns ownership", "Records rights", "Facilitates transfers"],
     createdAt: new Date("2023-01-15"),
@@ -25,7 +26,7 @@ const SAMPLE_CONTRACTS: ContractMetadata[] = [
   {
     id: "2",
     name: "RevenueSplit",
-    extension: ".sol",
+    extension: "",
     purpose: "Automates revenue sharing among investors, creators, and stakeholders",
     keyFunctions: ["Distributes income", "Handles multiple revenue streams"],
     createdAt: new Date("2023-02-10"),
@@ -34,7 +35,7 @@ const SAMPLE_CONTRACTS: ContractMetadata[] = [
   {
     id: "3",
     name: "Investment",
-    extension: ".sol",
+    extension: "",
     purpose: "Enables tokenized film investment",
     keyFunctions: ["Tracks contributions", "Issues film-backed tokens", "Automates investor payouts"],
     createdAt: new Date("2023-03-05"),
@@ -43,7 +44,7 @@ const SAMPLE_CONTRACTS: ContractMetadata[] = [
   {
     id: "4",
     name: "Licensing",
-    extension: ".sol",
+    extension: "",
     purpose: "Automates film licensing and royalty payments",
     keyFunctions: ["Issues licenses", "Enforces royalties on distribution"],
     createdAt: new Date("2023-04-12"),
@@ -52,7 +53,7 @@ const SAMPLE_CONTRACTS: ContractMetadata[] = [
   {
     id: "5",
     name: "StreamingPayouts",
-    extension: ".sol",
+    extension: "",
     purpose: "Connects to streaming platforms to process per-view revenue distribution",
     keyFunctions: ["Reads external streaming data", "Executes micropayments"],
     createdAt: new Date("2023-05-20"),
@@ -90,12 +91,12 @@ const Index = () => {
     setContracts(prev => [...prev, newContract]);
     setIsCreating(false);
     toast({
-      title: "Contract created",
-      description: `${data.name}${data.extension} has been created successfully.`,
+      title: "Contract deployed",
+      description: `${data.name} has been deployed successfully.`,
     });
   };
   
-  const handleSaveFullContract = (data: any) => {
+  const handleDeployContract = (data: any) => {
     // Extract metadata for the contract card
     const { name, purpose, extension, keyFunctions, type } = data;
     
@@ -103,7 +104,7 @@ const Index = () => {
     const newContract: ContractMetadata = {
       id: Date.now().toString(),
       name: name || type,
-      extension: extension || ".sol",
+      extension: extension || "",
       purpose: purpose || CONTRACT_TYPE_CONFIGS[type].description,
       keyFunctions: keyFunctions || [],
       createdAt: new Date(),
@@ -115,8 +116,8 @@ const Index = () => {
     setContracts(prev => [...prev, newContract]);
     setIsCreatingFull(false);
     toast({
-      title: "Contract created",
-      description: `${newContract.name}${newContract.extension} has been created successfully.`,
+      title: "Contract deployed",
+      description: `${newContract.name} has been deployed successfully.`,
     });
   };
 
@@ -137,7 +138,7 @@ const Index = () => {
       <div className="min-h-screen bg-background">
         <div className="container py-8">
           <ContractForm
-            onSave={handleSaveFullContract}
+            onSave={handleDeployContract}
             onCancel={() => setIsCreatingFull(false)}
           />
         </div>
@@ -164,7 +165,7 @@ const Index = () => {
       
       <main className="container py-8">
         <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center mb-8">
-          <h1 className="text-3xl font-semibold">Smart Contract Metadata Collection</h1>
+          <h1 className="text-3xl font-semibold">Smart Contract Collection</h1>
           
           <div className="flex gap-3 w-full md:w-auto">
             <div className="relative flex-1 md:w-64">
@@ -180,8 +181,8 @@ const Index = () => {
               onClick={() => setIsCreatingFull(true)}
               className="whitespace-nowrap"
             >
-              <Plus size={16} className="mr-1.5" />
-              New Contract
+              <Rocket size={16} className="mr-1.5" />
+              Deploy Contract
             </Button>
           </div>
         </div>
@@ -212,7 +213,8 @@ const Index = () => {
               onClick={() => setIsCreatingFull(true)}
               className="bg-accent hover:bg-accent/90"
             >
-              Create your first contract
+              <Rocket size={16} className="mr-1.5" />
+              Deploy your first contract
             </Button>
           </div>
         )}
@@ -254,7 +256,7 @@ const Index = () => {
               )}
               
               <div className="flex justify-between text-sm text-muted-foreground">
-                <span>Created: {new Date(viewContract.createdAt).toLocaleDateString()}</span>
+                <span>Deployed: {new Date(viewContract.createdAt).toLocaleDateString()}</span>
                 <span>Last updated: {new Date(viewContract.updatedAt).toLocaleDateString()}</span>
               </div>
             </div>

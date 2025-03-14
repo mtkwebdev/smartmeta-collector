@@ -4,13 +4,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { X, Plus } from "lucide-react";
+import { X, Plus, Users, Wallet, Trash } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 
 interface ContractFormFieldsProps {
   contractType: "FilmRights" | "RevenueSplit" | "Investment" | "Licensing" | "StreamingPayouts" | "Custom";
   onChange: (data: any) => void;
   initialData?: any;
+}
+
+interface Stakeholder {
+  name: string;
+  percentage: string;
+  walletId: string;
 }
 
 export const CONTRACT_TYPE_CONFIGS = {
@@ -30,8 +37,7 @@ export const CONTRACT_TYPE_CONFIGS = {
     description: "Automates revenue sharing among investors, creators, and stakeholders",
     fields: [
       { name: "projectTitle", label: "Project Title", type: "text", required: true },
-      { name: "stakeholders", label: "Stakeholders", type: "array", itemLabel: "Stakeholder" },
-      { name: "percentages", label: "Distribution Percentages", type: "array", itemLabel: "Percentage" },
+      { name: "stakeholdersTable", label: "Stakeholders", type: "stakeholdersTable", required: true },
       { name: "paymentFrequency", label: "Payment Frequency", type: "select", 
         options: ["Weekly", "Monthly", "Quarterly", "Yearly"] },
       { name: "minimumThreshold", label: "Minimum Payment Threshold", type: "number" },
@@ -99,6 +105,16 @@ const ContractFormFields = ({ contractType, onChange, initialData = {} }: Contra
     return fields;
   });
   
+  // Add state for stakeholders table
+  const [stakeholders, setStakeholders] = useState<Stakeholder[]>(
+    initialData.stakeholders || []
+  );
+  const [newStakeholder, setNewStakeholder] = useState<Stakeholder>({
+    name: "",
+    percentage: "",
+    walletId: ""
+  });
+  
   const [newItems, setNewItems] = useState<Record<string, string>>({});
   
   const handleInputChange = (fieldName: string, value: any) => {
@@ -133,6 +149,38 @@ const ContractFormFields = ({ contractType, onChange, initialData = {} }: Contra
     const updatedData = { ...formData, [fieldName]: updatedItems };
     setFormData(updatedData);
     onChange(updatedData);
+  };
+  
+  // Handler for stakeholder table
+  const handleAddStakeholder = () => {
+    if (!newStakeholder.name || !newStakeholder.percentage || !newStakeholder.walletId) {
+      return;
+    }
+    
+    const updatedStakeholders = [...stakeholders, newStakeholder];
+    setStakeholders(updatedStakeholders);
+    setNewStakeholder({ name: "", percentage: "", walletId: "" });
+    
+    // Update the main form data
+    const updatedData = { ...formData, stakeholders: updatedStakeholders };
+    setFormData(updatedData);
+    onChange(updatedData);
+  };
+  
+  const handleRemoveStakeholder = (index: number) => {
+    const updatedStakeholders = [...stakeholders];
+    updatedStakeholders.splice(index, 1);
+    
+    setStakeholders(updatedStakeholders);
+    
+    // Update the main form data
+    const updatedData = { ...formData, stakeholders: updatedStakeholders };
+    setFormData(updatedData);
+    onChange(updatedData);
+  };
+  
+  const handleStakeholderChange = (field: keyof Stakeholder, value: string) => {
+    setNewStakeholder({ ...newStakeholder, [field]: value });
   };
   
   const config = CONTRACT_TYPE_CONFIGS[contractType];
@@ -207,6 +255,98 @@ const ContractFormFields = ({ contractType, onChange, initialData = {} }: Contra
                     </option>
                   ))}
                 </select>
+              </div>
+            );
+          }
+          
+          if (field.type === "stakeholdersTable") {
+            return (
+              <div key={key} className="col-span-1 md:col-span-2">
+                <Label htmlFor={field.name} className="mb-2 block text-muted-foreground">
+                  {field.label}
+                  {field.required && <span className="text-destructive ml-1">*</span>}
+                </Label>
+                
+                <div className="border rounded-md p-4 space-y-4">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[200px]">Name</TableHead>
+                        <TableHead className="w-[150px]">Percentage (%)</TableHead>
+                        <TableHead>Wallet ID</TableHead>
+                        <TableHead className="w-[80px]">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {stakeholders.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={4} className="text-center py-4 text-muted-foreground">
+                            No stakeholders added yet
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        stakeholders.map((stakeholder, index) => (
+                          <TableRow key={index}>
+                            <TableCell>{stakeholder.name}</TableCell>
+                            <TableCell>{stakeholder.percentage}%</TableCell>
+                            <TableCell className="font-mono text-xs">{stakeholder.walletId}</TableCell>
+                            <TableCell>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleRemoveStakeholder(index)}
+                                className="h-8 w-8 p-0"
+                              >
+                                <Trash className="h-4 w-4 text-destructive" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div className="flex items-center gap-2">
+                      <Users size={16} className="text-muted-foreground" />
+                      <Input
+                        placeholder="Stakeholder Name"
+                        value={newStakeholder.name}
+                        onChange={(e) => handleStakeholderChange("name", e.target.value)}
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-muted-foreground">%</span>
+                      <Input
+                        placeholder="Percentage"
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={newStakeholder.percentage}
+                        onChange={(e) => handleStakeholderChange("percentage", e.target.value)}
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Wallet size={16} className="text-muted-foreground" />
+                      <Input
+                        placeholder="Wallet ID"
+                        value={newStakeholder.walletId}
+                        onChange={(e) => handleStakeholderChange("walletId", e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  
+                  <Button
+                    type="button"
+                    onClick={handleAddStakeholder}
+                    className="w-full bg-accent hover:bg-accent/90"
+                    disabled={!newStakeholder.name || !newStakeholder.percentage || !newStakeholder.walletId}
+                  >
+                    <Plus className="h-4 w-4 mr-1" />
+                    Add Stakeholder
+                  </Button>
+                </div>
               </div>
             );
           }
