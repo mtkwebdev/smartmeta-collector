@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { FileText, FilePdf, FileSpreadsheet, Eye, Download } from "lucide-react";
+import { FileText, File, FileSpreadsheet, Eye, Download } from "lucide-react";
 
 interface Document {
   id: string;
@@ -47,7 +47,7 @@ const ContractDocuments = ({ contractId, onViewDocument }: ContractDocumentsProp
   const getDocumentIcon = (type: Document['type']) => {
     switch (type) {
       case 'pdf':
-        return <FilePdf className="h-5 w-5 text-red-500" />;
+        return <File className="h-5 w-5 text-red-500" />;
       case 'word':
         return <FileText className="h-5 w-5 text-blue-500" />;
       case 'excel':
