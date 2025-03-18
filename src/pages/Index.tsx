@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import ContractCard, { ContractMetadata } from "@/components/ContractCard";
@@ -299,7 +300,10 @@ const Index = () => {
           
           {viewContract && (
             viewContract.contractData ? (
-              <ContractDetails contractData={viewContract.contractData} />
+              <ContractDetails 
+                contractData={viewContract.contractData}
+                contractId={viewContract.id}
+              />
             ) : (
               <div className="space-y-4">
                 <div>

@@ -1,20 +1,27 @@
-
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Film, Key, Share, List, ArrowRight, CheckCheck, Scroll, Code, Globe } from "lucide-react";
+import { Film, Key, Share, List, ArrowRight, CheckCheck, Scroll, Code, Globe, FileText } from "lucide-react";
+import ContractDocuments from "./ContractDocuments";
 
 interface ContractDetailProps {
   contractData: any;
+  contractId: string;
 }
 
-const ContractDetails = ({ contractData }: ContractDetailProps) => {
+const ContractDetails = ({ contractData, contractId }: ContractDetailProps) => {
   const [activeTab, setActiveTab] = useState("overview");
+  const [viewingDocumentId, setViewingDocumentId] = useState<string | null>(null);
   
   if (!contractData) return null;
+  
+  const handleViewDocument = (documentId: string) => {
+    setViewingDocumentId(documentId);
+    setActiveTab("document");
+  };
   
   return (
     <div className="space-y-6">
@@ -40,11 +47,15 @@ const ContractDetails = ({ contractData }: ContractDetailProps) => {
         </CardHeader>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="px-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="properties">Properties</TabsTrigger>
             <TabsTrigger value="events">Events</TabsTrigger>
             <TabsTrigger value="functions">Functions</TabsTrigger>
+            <TabsTrigger value="document" className="flex items-center gap-1">
+              <FileText className="h-4 w-4" />
+              Documents
+            </TabsTrigger>
           </TabsList>
           
           <TabsContent value="overview" className="py-4 space-y-4">
@@ -264,6 +275,36 @@ const ContractDetails = ({ contractData }: ContractDetailProps) => {
                 </Card>
               ))}
             </div>
+          </TabsContent>
+          
+          <TabsContent value="document" className="py-4">
+            {viewingDocumentId ? (
+              <div className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <FileText className="h-5 w-5 text-accent" />
+                      Document Viewer
+                    </CardTitle>
+                    <CardDescription>
+                      Viewing metadata from document
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="border rounded-md p-4 bg-muted/10">
+                      <pre className="text-sm overflow-auto whitespace-pre-wrap">
+                        {JSON.stringify(contractData, null, 2)}
+                      </pre>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            ) : (
+              <ContractDocuments 
+                contractId={contractId} 
+                onViewDocument={handleViewDocument} 
+              />
+            )}
           </TabsContent>
         </Tabs>
       </Card>
