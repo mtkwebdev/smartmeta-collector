@@ -16,7 +16,7 @@ export interface ContractMetadata {
   keyFunctions: string[];
   createdAt: Date;
   updatedAt: Date;
-  contractData?: any; // Adding the missing contractData property
+  contractData?: any;
 }
 
 interface ContractCardProps {

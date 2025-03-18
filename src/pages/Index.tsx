@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import ContractCard, { ContractMetadata } from "@/components/ContractCard";
 import ContractMetadataForm from "@/components/ContractMetadataForm";
 import ContractForm from "@/components/ContractForm";
+import ContractFileSelector from "@/components/ContractFileSelector";
 import ContractDetails from "@/components/ContractDetails";
 import { CONTRACT_TYPE_CONFIGS } from "@/components/ContractFormFields";
 import { Button } from "@/components/ui/button";
@@ -137,6 +138,8 @@ const Index = () => {
   const [viewContract, setViewContract] = useState<ContractMetadata | null>(null);
   const [activeTab, setActiveTab] = useState("all");
   const [selectedContractForDeployment, setSelectedContractForDeployment] = useState<ContractMetadata | null>(null);
+  const [showFileSelector, setShowFileSelector] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<any>(null);
   
   const filteredContracts = contracts.filter(contract => {
     const matchesSearch = 
@@ -168,10 +171,11 @@ const Index = () => {
     if (selectedContractForDeployment) {
       toast({
         title: "Contract deployed from template",
-        description: `New deployment based on ${selectedContractForDeployment.name} has been initiated.`,
+        description: `New deployment based on ${selectedContractForDeployment.name} has been initiated with file: ${selectedFile?.name}.`,
       });
       setSelectedContractForDeployment(null);
       setIsCreatingFull(false);
+      setSelectedFile(null);
       return;
     }
     
@@ -191,9 +195,10 @@ const Index = () => {
     
     setContracts(prev => [...prev, newContract]);
     setIsCreatingFull(false);
+    setSelectedFile(null);
     toast({
       title: "Contract deployed",
-      description: `${newContract.name} has been deployed successfully.`,
+      description: `${newContract.name} has been deployed successfully with file: ${selectedFile?.name}.`,
     });
   };
 
@@ -215,14 +220,43 @@ const Index = () => {
     const contract = contracts.find(c => c.id === id);
     if (contract) {
       setSelectedContractForDeployment(contract);
-      setIsCreatingFull(true);
+      setShowFileSelector(true);
     }
+  };
+
+  const handleFileSelect = (file: any) => {
+    setSelectedFile(file);
+    setShowFileSelector(false);
+    setIsCreatingFull(true);
   };
 
   const getUniqueExtensions = () => {
     const extensions = contracts.map(c => c.extension).filter(ext => ext !== "");
     return Array.from(new Set(extensions));
   };
+
+  // Handle direct "Deploy Contract" button click
+  const handleNewContractDeploy = () => {
+    setSelectedContractForDeployment(null);
+    setShowFileSelector(true);
+  };
+
+  if (showFileSelector) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="container py-8">
+          <ContractFileSelector
+            onCancel={() => {
+              setShowFileSelector(false);
+              setSelectedContractForDeployment(null);
+            }}
+            onNext={handleFileSelect}
+            contractName={selectedContractForDeployment?.name}
+          />
+        </div>
+      </div>
+    );
+  }
 
   if (isCreatingFull) {
     return (
@@ -233,6 +267,7 @@ const Index = () => {
             onCancel={() => {
               setIsCreatingFull(false);
               setSelectedContractForDeployment(null);
+              setSelectedFile(null);
             }}
             initialData={selectedContractForDeployment?.contractData}
           />
@@ -256,7 +291,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <Header onNewContract={() => setIsCreatingFull(true)} />
+      <Header onNewContract={handleNewContractDeploy} />
       
       <main className="container py-8">
         <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center mb-8">
@@ -273,7 +308,7 @@ const Index = () => {
               />
             </div>
             <Button 
-              onClick={() => setIsCreatingFull(true)}
+              onClick={handleNewContractDeploy}
               className="whitespace-nowrap"
             >
               <Rocket size={16} className="mr-1.5" />
@@ -306,7 +341,7 @@ const Index = () => {
           <div className="text-center py-16 bg-muted/30 rounded-lg border border-dashed">
             <h3 className="text-xl font-medium text-muted-foreground mb-4">No contracts found</h3>
             <Button 
-              onClick={() => setIsCreatingFull(true)}
+              onClick={handleNewContractDeploy}
               className="bg-accent hover:bg-accent/90"
             >
               <Rocket size={16} className="mr-1.5" />
