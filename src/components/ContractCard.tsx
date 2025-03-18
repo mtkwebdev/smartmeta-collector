@@ -1,9 +1,10 @@
+
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Eye } from "lucide-react";
+import { Eye, Rocket } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIntersectionObserver } from "./animations";
 
@@ -21,12 +22,14 @@ export interface ContractMetadata {
 interface ContractCardProps {
   contract: ContractMetadata;
   onView?: (id: string) => void;
+  onDeploy?: (id: string) => void;
   className?: string;
 }
 
 const ContractCard = ({
   contract,
   onView,
+  onDeploy,
   className,
 }: ContractCardProps) => {
   const [ref, isVisible] = useIntersectionObserver({
@@ -97,6 +100,14 @@ const ContractCard = ({
           className="h-8 px-2"
         >
           <Eye size={16} className="mr-1" /> View
+        </Button>
+        <Button 
+          size="sm" 
+          variant="ghost" 
+          onClick={() => onDeploy?.(contract.id)}
+          className="h-8 px-2"
+        >
+          <Rocket size={16} className="mr-1" /> Deploy
         </Button>
       </CardFooter>
     </Card>

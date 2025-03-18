@@ -136,7 +136,8 @@ const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [viewContract, setViewContract] = useState<ContractMetadata | null>(null);
   const [activeTab, setActiveTab] = useState("all");
-
+  const [selectedContractForDeployment, setSelectedContractForDeployment] = useState<ContractMetadata | null>(null);
+  
   const filteredContracts = contracts.filter(contract => {
     const matchesSearch = 
       contract.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -163,6 +164,18 @@ const Index = () => {
   };
   
   const handleDeployContract = (data: any) => {
+    // If deploying from an existing contract template
+    if (selectedContractForDeployment) {
+      toast({
+        title: "Contract deployed from template",
+        description: `New deployment based on ${selectedContractForDeployment.name} has been initiated.`,
+      });
+      setSelectedContractForDeployment(null);
+      setIsCreatingFull(false);
+      return;
+    }
+    
+    // Regular contract deployment
     const { name, purpose, extension, keyFunctions, type } = data;
     
     const newContract: ContractMetadata = {
@@ -197,6 +210,14 @@ const Index = () => {
       }
     }
   };
+  
+  const handleDeploy = (id: string) => {
+    const contract = contracts.find(c => c.id === id);
+    if (contract) {
+      setSelectedContractForDeployment(contract);
+      setIsCreatingFull(true);
+    }
+  };
 
   const getUniqueExtensions = () => {
     const extensions = contracts.map(c => c.extension).filter(ext => ext !== "");
@@ -209,7 +230,11 @@ const Index = () => {
         <div className="container py-8">
           <ContractForm
             onSave={handleDeployContract}
-            onCancel={() => setIsCreatingFull(false)}
+            onCancel={() => {
+              setIsCreatingFull(false);
+              setSelectedContractForDeployment(null);
+            }}
+            initialData={selectedContractForDeployment?.contractData}
           />
         </div>
       </div>
@@ -273,6 +298,7 @@ const Index = () => {
                 key={contract.id}
                 contract={contract}
                 onView={handleView}
+                onDeploy={handleDeploy}
               />
             ))}
           </div>
