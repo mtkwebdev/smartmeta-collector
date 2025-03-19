@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import ContractCard, { ContractMetadata } from "@/components/ContractCard";
@@ -19,7 +18,7 @@ const SAMPLE_CONTRACTS: ContractMetadata[] = [
   {
     id: "1",
     name: "FilmRights",
-    extension: "",
+    extension: "ERC-721",
     purpose: "Manages ownership of IP, assigns revenue shares",
     keyFunctions: ["Assigns ownership", "Records rights", "Facilitates transfers"],
     createdAt: new Date("2023-01-15"),
@@ -28,7 +27,7 @@ const SAMPLE_CONTRACTS: ContractMetadata[] = [
   {
     id: "2",
     name: "RevenueSplit",
-    extension: "",
+    extension: "ERC-20",
     purpose: "Automates revenue sharing among investors, creators, and stakeholders",
     keyFunctions: ["Distributes income", "Handles multiple revenue streams"],
     createdAt: new Date("2023-02-10"),
@@ -37,7 +36,7 @@ const SAMPLE_CONTRACTS: ContractMetadata[] = [
   {
     id: "3",
     name: "Investment",
-    extension: "",
+    extension: "ERC-1155",
     purpose: "Enables tokenized film investment",
     keyFunctions: ["Tracks contributions", "Issues film-backed tokens", "Automates investor payouts"],
     createdAt: new Date("2023-03-05"),
@@ -46,7 +45,7 @@ const SAMPLE_CONTRACTS: ContractMetadata[] = [
   {
     id: "4",
     name: "Licensing",
-    extension: "",
+    extension: "ERC-721",
     purpose: "Automates film licensing and royalty payments",
     keyFunctions: ["Issues licenses", "Enforces royalties on distribution"],
     createdAt: new Date("2023-04-12"),
@@ -55,7 +54,7 @@ const SAMPLE_CONTRACTS: ContractMetadata[] = [
   {
     id: "5",
     name: "StreamingPayouts",
-    extension: "",
+    extension: "ERC-20",
     purpose: "Connects to streaming platforms to process per-view revenue distribution",
     keyFunctions: ["Reads external streaming data", "Executes micropayments"],
     createdAt: new Date("2023-05-20"),
@@ -63,7 +62,7 @@ const SAMPLE_CONTRACTS: ContractMetadata[] = [
   },
 ];
 
-// Sample Film Rights contract metadata for the ContractDetails view
+// Sample FilmRights contract metadata for the ContractDetails view
 const FILM_RIGHTS_METADATA = {
   "title": "FilmRights",
   "version": "1.0.0",
@@ -127,6 +126,265 @@ const FILM_RIGHTS_METADATA = {
     "Chainlink": ">=1.0.0"
   },
   "chainSupport": ["Ethereum", "Polygon", "Binance Smart Chain"]
+};
+
+// Sample RevenueSplit contract metadata
+const REVENUE_SPLIT_METADATA = {
+  "title": "RevenueSplit",
+  "version": "1.2.0",
+  "description": "Smart contract for automating revenue distribution among stakeholders in film projects",
+  "contractProperties": {
+    "project": {
+      "projectId": "string",
+      "title": "string",
+      "description": "string",
+      "creationDate": "uint256",
+      "totalRevenue": "uint256"
+    },
+    "stakeholders": {
+      "address": "address",
+      "name": "string",
+      "sharePercentage": "uint256",
+      "stakeholderType": "string",
+      "paymentAddress": "address"
+    },
+    "revenueStreams": {
+      "streamId": "uint256",
+      "name": "string",
+      "description": "string",
+      "active": "bool",
+      "revenueCap": "uint256"
+    }
+  },
+  "events": {
+    "RevenueReceived": {
+      "amount": "uint256",
+      "source": "string",
+      "timestamp": "uint256"
+    },
+    "PaymentDistributed": {
+      "recipient": "address",
+      "amount": "uint256",
+      "timestamp": "uint256",
+      "success": "bool"
+    },
+    "StakeholderAdded": {
+      "stakeholderAddress": "address",
+      "name": "string",
+      "percentage": "uint256",
+      "timestamp": "uint256"
+    }
+  },
+  "functions": {
+    "addRevenue": "Function to add new revenue to the contract",
+    "distributePayments": "Function to distribute payments to stakeholders",
+    "addStakeholder": "Function to add a new stakeholder",
+    "updateShares": "Function to update stakeholder shares",
+    "getStakeholderBalance": "Function to check stakeholder balance",
+    "withdrawFunds": "Function for stakeholders to withdraw their funds",
+    "getRevenueHistory": "Function to view historical revenue data",
+    "pauseDistributions": "Function to temporarily pause distributions"
+  },
+  "standards": ["ERC-20"],
+  "dependencies": {
+    "OpenZeppelin": ">=4.0.0",
+    "Chainlink": ">=1.0.0"
+  },
+  "chainSupport": ["Ethereum", "Polygon", "Optimism"]
+};
+
+// Sample Investment contract metadata
+const INVESTMENT_METADATA = {
+  "title": "Investment",
+  "version": "1.3.0",
+  "description": "Smart contract for tokenized investment in film and media projects",
+  "contractProperties": {
+    "project": {
+      "projectId": "string",
+      "title": "string",
+      "description": "string",
+      "goal": "uint256",
+      "minimumInvestment": "uint256",
+      "deadline": "uint256"
+    },
+    "token": {
+      "name": "string",
+      "symbol": "string",
+      "totalSupply": "uint256",
+      "decimals": "uint8"
+    },
+    "investorInfo": {
+      "address": "address",
+      "amount": "uint256",
+      "tokens": "uint256",
+      "investmentDate": "uint256",
+      "claimedReturns": "uint256"
+    }
+  },
+  "events": {
+    "InvestmentReceived": {
+      "investor": "address",
+      "amount": "uint256",
+      "tokens": "uint256",
+      "timestamp": "uint256"
+    },
+    "GoalReached": {
+      "totalAmount": "uint256",
+      "numberOfInvestors": "uint256",
+      "timestamp": "uint256"
+    },
+    "ReturnDistributed": {
+      "investor": "address",
+      "amount": "uint256",
+      "timestamp": "uint256"
+    }
+  },
+  "functions": {
+    "invest": "Function to make an investment in the project",
+    "withdrawInvestment": "Function to withdraw investment if goal not met",
+    "distributeReturns": "Function to distribute returns to investors",
+    "getTotalInvestment": "Function to check total investment raised",
+    "getInvestorInfo": "Function to get information about an investor",
+    "claimTokens": "Function for investor to claim their tokens",
+    "projectStatus": "Function to check status of funding goals",
+    "extendDeadline": "Function to extend the investment deadline"
+  },
+  "standards": ["ERC-1155"],
+  "dependencies": {
+    "OpenZeppelin": ">=4.0.0",
+    "Chainlink": ">=1.0.0"
+  },
+  "chainSupport": ["Ethereum", "Polygon", "Avalanche"]
+};
+
+// Sample Licensing contract metadata
+const LICENSING_METADATA = {
+  "title": "Licensing",
+  "version": "1.1.0",
+  "description": "Smart contract for automating film licensing agreements and royalty payments",
+  "contractProperties": {
+    "content": {
+      "contentId": "string",
+      "title": "string",
+      "description": "string",
+      "contentType": "string",
+      "contentHash": "bytes32"
+    },
+    "licenseTerms": {
+      "licenseId": "uint256",
+      "licensee": "address",
+      "licenseType": "string",
+      "startDate": "uint256",
+      "endDate": "uint256",
+      "territories": "string[]",
+      "royaltyRate": "uint256"
+    },
+    "usageReporting": {
+      "reportId": "uint256",
+      "usageAmount": "uint256",
+      "reportDate": "uint256",
+      "verified": "bool"
+    }
+  },
+  "events": {
+    "LicenseIssued": {
+      "licenseId": "uint256",
+      "licensee": "address",
+      "contentId": "string",
+      "timestamp": "uint256"
+    },
+    "RoyaltyPaid": {
+      "licensee": "address",
+      "licensor": "address",
+      "amount": "uint256",
+      "timestamp": "uint256"
+    },
+    "LicenseTransferred": {
+      "licenseId": "uint256",
+      "from": "address",
+      "to": "address",
+      "timestamp": "uint256"
+    }
+  },
+  "functions": {
+    "issueLicense": "Function to issue a new license to a licensee",
+    "renewLicense": "Function to renew an existing license",
+    "reportUsage": "Function for licensees to report content usage",
+    "calculateRoyalties": "Function to calculate royalties based on usage",
+    "payRoyalties": "Function to pay royalties to licensor",
+    "verifyUsage": "Function to verify reported usage data",
+    "transferLicense": "Function to transfer a license to another entity",
+    "getLicenseStatus": "Function to check status of a license"
+  },
+  "standards": ["ERC-721"],
+  "dependencies": {
+    "OpenZeppelin": ">=4.0.0",
+    "Chainlink": ">=1.0.0"
+  },
+  "chainSupport": ["Ethereum", "Polygon", "Arbitrum"]
+};
+
+// Sample StreamingPayouts contract metadata
+const STREAMING_PAYOUTS_METADATA = {
+  "title": "StreamingPayouts",
+  "version": "1.0.0",
+  "description": "Smart contract for automated per-view revenue distribution from streaming platforms",
+  "contractProperties": {
+    "content": {
+      "contentId": "string",
+      "title": "string",
+      "type": "string",
+      "duration": "uint256",
+      "streamRate": "uint256"
+    },
+    "platformConnection": {
+      "platformId": "string",
+      "apiEndpoint": "string",
+      "apiKey": "bytes32",
+      "active": "bool"
+    },
+    "beneficiary": {
+      "address": "address",
+      "role": "string",
+      "sharePercentage": "uint256",
+      "minimumPayout": "uint256"
+    }
+  },
+  "events": {
+    "StreamDataReceived": {
+      "platform": "string",
+      "contentId": "string",
+      "views": "uint256",
+      "revenue": "uint256",
+      "timestamp": "uint256"
+    },
+    "PayoutProcessed": {
+      "beneficiary": "address",
+      "amount": "uint256",
+      "timestamp": "uint256"
+    },
+    "PlatformAdded": {
+      "platformId": "string",
+      "apiEndpoint": "string",
+      "timestamp": "uint256"
+    }
+  },
+  "functions": {
+    "addStreamingPlatform": "Function to connect to a streaming platform",
+    "updateStreamingRates": "Function to update per-view payout rates",
+    "fetchStreamingData": "Function to fetch view count data from platforms",
+    "processPayout": "Function to process payouts to beneficiaries",
+    "addBeneficiary": "Function to add a new beneficiary",
+    "getStreamingStatistics": "Function to get streaming statistics",
+    "calculateRevenue": "Function to calculate revenue based on views",
+    "withdrawFunds": "Function for beneficiaries to withdraw funds"
+  },
+  "standards": ["ERC-20"],
+  "dependencies": {
+    "OpenZeppelin": ">=4.0.0",
+    "Chainlink": ">=1.0.0"
+  },
+  "chainSupport": ["Ethereum", "Polygon", "Base"]
 };
 
 const Index = () => {
@@ -205,10 +463,32 @@ const Index = () => {
   const handleView = (id: string) => {
     const contract = contracts.find(c => c.id === id);
     if (contract) {
-      if (contract.name === "FilmRights" && !contract.contractData) {
+      let contractData;
+      
+      switch(contract.name) {
+        case "FilmRights":
+          contractData = FILM_RIGHTS_METADATA;
+          break;
+        case "RevenueSplit":
+          contractData = REVENUE_SPLIT_METADATA;
+          break;
+        case "Investment":
+          contractData = INVESTMENT_METADATA;
+          break;
+        case "Licensing":
+          contractData = LICENSING_METADATA;
+          break;
+        case "StreamingPayouts":
+          contractData = STREAMING_PAYOUTS_METADATA;
+          break;
+        default:
+          contractData = null;
+      }
+      
+      if (contractData && !contract.contractData) {
         setViewContract({
           ...contract,
-          contractData: FILM_RIGHTS_METADATA
+          contractData
         });
       } else {
         setViewContract(contract);

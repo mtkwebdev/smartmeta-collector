@@ -60,9 +60,11 @@ const ContractCard = ({
     >
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
-          <Badge className="mb-2 bg-accent/10 text-accent hover:bg-accent/20 transition-colors">
-            {contract.extension}
-          </Badge>
+          {contract.extension && (
+            <Badge className="mb-2 bg-accent/10 text-accent hover:bg-accent/20 transition-colors">
+              {contract.extension}
+            </Badge>
+          )}
           <span className="text-xs text-muted-foreground">
             {new Date(contract.updatedAt).toLocaleDateString()}
           </span>

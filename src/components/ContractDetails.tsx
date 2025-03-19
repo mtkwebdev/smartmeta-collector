@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Film, Key, Share, List, ArrowRight, CheckCheck, Scroll, Code, Globe, FileText, Info } from "lucide-react";
+import { Film, Key, Share, List, ArrowRight, CheckCheck, Scroll, Code, Globe, FileText, Info, Coins, Wallet, Tag, Radio } from "lucide-react";
 import ContractDocuments from "./ContractDocuments";
 
 interface ContractDetailProps {
@@ -24,6 +24,112 @@ const ContractDetails = ({ contractData, contractId }: ContractDetailProps) => {
     setActiveTab("document");
   };
   
+  // Render appropriate icon based on contract title
+  const renderContractIcon = () => {
+    switch(contractData.title) {
+      case "FilmRights":
+        return <Film className="h-5 w-5 text-accent" />;
+      case "RevenueSplit":
+        return <Share className="h-5 w-5 text-accent" />;
+      case "Investment":
+        return <Wallet className="h-5 w-5 text-accent" />;
+      case "Licensing":
+        return <Tag className="h-5 w-5 text-accent" />;
+      case "StreamingPayouts":
+        return <Radio className="h-5 w-5 text-accent" />;
+      default:
+        return <Film className="h-5 w-5 text-accent" />;
+    }
+  };
+
+  // Generate appropriate features and use cases based on contract type
+  const getContractFeatures = () => {
+    switch(contractData.title) {
+      case "FilmRights":
+        return {
+          features: [
+            "Manages ownership of film IP rights on the blockchain",
+            "Handles revenue share distribution among stakeholders",
+            "Provides licensing functionality for third parties",
+            "Supports multiple blockchain standards and networks"
+          ],
+          useCases: [
+            "Independent filmmakers establishing transparent IP rights",
+            "Studios managing revenue shares with investors and talents",
+            "Streamlined licensing process for distributors",
+            "Automatic payment splits based on revenue allocation"
+          ]
+        };
+      case "RevenueSplit":
+        return {
+          features: [
+            "Automates revenue distribution to multiple stakeholders",
+            "Supports various revenue streams and payment schedules",
+            "Provides transparent accounting and distribution records",
+            "Enables dynamic adjustment of stakeholder shares"
+          ],
+          useCases: [
+            "Film production companies distributing profits to investors",
+            "Music rights management across multiple platforms",
+            "Digital content creator revenue sharing with collaborators",
+            "Cross-border royalty distributions with minimal fees"
+          ]
+        };
+      case "Investment":
+        return {
+          features: [
+            "Tokenizes film investment opportunities for fractional ownership",
+            "Enables transparent tracking of investment allocations",
+            "Automates return distributions based on revenue performance",
+            "Provides liquidity for traditionally illiquid film investments"
+          ],
+          useCases: [
+            "Independent film funding through tokenized investments",
+            "Fan-based funding for creator-driven projects",
+            "Portfolio diversification for media investors",
+            "Secondary market trading of film investment shares"
+          ]
+        };
+      case "Licensing":
+        return {
+          features: [
+            "Automates licensing agreements through smart contracts",
+            "Enforces royalty payments based on usage reports",
+            "Manages territorial rights and restrictions",
+            "Enables transferable and time-bound licenses"
+          ],
+          useCases: [
+            "Film distribution across multiple territories",
+            "Licensing content to streaming platforms with automated payments",
+            "Managing music synchronization rights for films",
+            "Sublicensing management with royalty tracking"
+          ]
+        };
+      case "StreamingPayouts":
+        return {
+          features: [
+            "Connects to streaming platform APIs for usage data",
+            "Processes micropayments based on per-view metrics",
+            "Distributes revenue to multiple stakeholders in real-time",
+            "Provides detailed analytics on streaming performance"
+          ],
+          useCases: [
+            "Creator payments based on actual streaming metrics",
+            "Real-time revenue splits for collaborative content",
+            "Cross-platform revenue aggregation and distribution",
+            "Transparent reporting for stakeholders on content performance"
+          ]
+        };
+      default:
+        return {
+          features: [],
+          useCases: []
+        };
+    }
+  };
+  
+  const { features, useCases } = getContractFeatures();
+  
   return (
     <div className="space-y-6">
       <Card>
@@ -39,7 +145,7 @@ const ContractDetails = ({ contractData, contractId }: ContractDetailProps) => {
             ))}
           </div>
           <CardTitle className="text-2xl flex items-center gap-2">
-            <Film className="h-5 w-5 text-accent" />
+            {renderContractIcon()}
             {contractData.title}
           </CardTitle>
           <CardDescription className="text-base mt-1">
@@ -78,20 +184,18 @@ const ContractDetails = ({ contractData, contractId }: ContractDetailProps) => {
                 <div>
                   <h3 className="text-sm font-medium mb-2">Key Features:</h3>
                   <ul className="list-disc pl-6 space-y-1">
-                    <li>Manages ownership of film IP rights on the blockchain</li>
-                    <li>Handles revenue share distribution among stakeholders</li>
-                    <li>Provides licensing functionality for third parties</li>
-                    <li>Supports multiple blockchain standards and networks</li>
+                    {features.map((feature, index) => (
+                      <li key={index}>{feature}</li>
+                    ))}
                   </ul>
                 </div>
                 
                 <div>
                   <h3 className="text-sm font-medium mb-2">Primary Use Cases:</h3>
                   <ul className="list-disc pl-6 space-y-1">
-                    <li>Independent filmmakers establishing transparent IP rights</li>
-                    <li>Studios managing revenue shares with investors and talents</li>
-                    <li>Streamlined licensing process for distributors</li>
-                    <li>Automatic payment splits based on revenue allocation</li>
+                    {useCases.map((useCase, index) => (
+                      <li key={index}>{useCase}</li>
+                    ))}
                   </ul>
                 </div>
               </CardContent>
@@ -147,98 +251,52 @@ const ContractDetails = ({ contractData, contractId }: ContractDetailProps) => {
                   <div>
                     <h3 className="text-sm font-medium mb-2">Properties</h3>
                     <Accordion type="single" collapsible className="w-full">
-                      <AccordionItem value="film">
-                        <AccordionTrigger className="hover:bg-muted/50 px-4 rounded-md">
-                          <div className="flex items-center gap-2">
-                            <Film className="h-4 w-4 text-accent" />
-                            <span>Film Properties</span>
-                          </div>
-                        </AccordionTrigger>
-                        <AccordionContent className="px-4">
-                          <Table>
-                            <TableHeader>
-                              <TableRow>
-                                <TableHead>Property</TableHead>
-                                <TableHead>Type</TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {Object.entries(contractData.contractProperties?.film || {}).map(([key, type]) => (
-                                <TableRow key={key}>
-                                  <TableCell className="font-medium">{key}</TableCell>
-                                  <TableCell>
-                                    <code className="bg-muted px-1 py-0.5 rounded text-xs">
-                                      {type as string}
-                                    </code>
-                                  </TableCell>
+                      {Object.entries(contractData.contractProperties || {}).map(([sectionName, properties]) => (
+                        <AccordionItem key={sectionName} value={sectionName}>
+                          <AccordionTrigger className="hover:bg-muted/50 px-4 rounded-md">
+                            <div className="flex items-center gap-2">
+                              {sectionName === "film" || sectionName === "content" ? (
+                                <Film className="h-4 w-4 text-accent" />
+                              ) : sectionName === "rightsOwnership" || sectionName === "licenseTerms" ? (
+                                <Key className="h-4 w-4 text-accent" />
+                              ) : sectionName === "revenueShares" || sectionName === "stakeholders" ? (
+                                <Share className="h-4 w-4 text-accent" />
+                              ) : sectionName === "token" || sectionName === "project" ? (
+                                <Coins className="h-4 w-4 text-accent" />
+                              ) : sectionName === "beneficiary" || sectionName === "investorInfo" ? (
+                                <Wallet className="h-4 w-4 text-accent" />
+                              ) : sectionName === "platformConnection" || sectionName === "usageReporting" ? (
+                                <Radio className="h-4 w-4 text-accent" />
+                              ) : (
+                                <List className="h-4 w-4 text-accent" />
+                              )}
+                              <span>{sectionName.charAt(0).toUpperCase() + sectionName.slice(1)}</span>
+                            </div>
+                          </AccordionTrigger>
+                          <AccordionContent className="px-4">
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead>Property</TableHead>
+                                  <TableHead>Type</TableHead>
                                 </TableRow>
-                              ))}
-                            </TableBody>
-                          </Table>
-                        </AccordionContent>
-                      </AccordionItem>
-                      
-                      <AccordionItem value="rightsOwnership">
-                        <AccordionTrigger className="hover:bg-muted/50 px-4 rounded-md">
-                          <div className="flex items-center gap-2">
-                            <Key className="h-4 w-4 text-accent" />
-                            <span>Rights Ownership</span>
-                          </div>
-                        </AccordionTrigger>
-                        <AccordionContent className="px-4">
-                          <Table>
-                            <TableHeader>
-                              <TableRow>
-                                <TableHead>Property</TableHead>
-                                <TableHead>Type</TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {Object.entries(contractData.contractProperties?.rightsOwnership || {}).map(([key, type]) => (
-                                <TableRow key={key}>
-                                  <TableCell className="font-medium">{key}</TableCell>
-                                  <TableCell>
-                                    <code className="bg-muted px-1 py-0.5 rounded text-xs">
-                                      {type as string}
-                                    </code>
-                                  </TableCell>
-                                </TableRow>
-                              ))}
-                            </TableBody>
-                          </Table>
-                        </AccordionContent>
-                      </AccordionItem>
-                      
-                      <AccordionItem value="revenueShares">
-                        <AccordionTrigger className="hover:bg-muted/50 px-4 rounded-md">
-                          <div className="flex items-center gap-2">
-                            <Share className="h-4 w-4 text-accent" />
-                            <span>Revenue Shares</span>
-                          </div>
-                        </AccordionTrigger>
-                        <AccordionContent className="px-4">
-                          <Table>
-                            <TableHeader>
-                              <TableRow>
-                                <TableHead>Property</TableHead>
-                                <TableHead>Type</TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {Object.entries(contractData.contractProperties?.revenueShares || {}).map(([key, type]) => (
-                                <TableRow key={key}>
-                                  <TableCell className="font-medium">{key}</TableCell>
-                                  <TableCell>
-                                    <code className="bg-muted px-1 py-0.5 rounded text-xs">
-                                      {type as string}
-                                    </code>
-                                  </TableCell>
-                                </TableRow>
-                              ))}
-                            </TableBody>
-                          </Table>
-                        </AccordionContent>
-                      </AccordionItem>
+                              </TableHeader>
+                              <TableBody>
+                                {Object.entries(properties as object).map(([key, type]) => (
+                                  <TableRow key={key}>
+                                    <TableCell className="font-medium">{key}</TableCell>
+                                    <TableCell>
+                                      <code className="bg-muted px-1 py-0.5 rounded text-xs">
+                                        {type as string}
+                                      </code>
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
+                          </AccordionContent>
+                        </AccordionItem>
+                      ))}
                     </Accordion>
                   </div>
                   
@@ -363,17 +421,25 @@ const ContractDetails = ({ contractData, contractId }: ContractDetailProps) => {
                   <div>
                     <h3 className="text-sm font-medium mb-2">Implementation Details</h3>
                     <p className="text-sm">
-                      This contract implements the ERC-721 and ERC-1155 standards to represent film rights as non-fungible tokens.
-                      It leverages OpenZeppelin's secure implementation of these standards and uses Chainlink for oracle data.
+                      {contractData.title === "FilmRights" && "This contract implements the ERC-721 and ERC-1155 standards to represent film rights as non-fungible tokens."}
+                      {contractData.title === "RevenueSplit" && "This contract implements the ERC-20 standard to handle fungible token transfers for revenue sharing."}
+                      {contractData.title === "Investment" && "This contract implements the ERC-1155 standard to represent investment shares as semi-fungible tokens."}
+                      {contractData.title === "Licensing" && "This contract implements the ERC-721 standard to represent unique licenses as non-fungible tokens."}
+                      {contractData.title === "StreamingPayouts" && "This contract implements the ERC-20 standard and oracle connections to process streaming data."}
+                      {" It leverages OpenZeppelin's secure implementation of these standards and uses Chainlink for oracle data."}
                     </p>
                     
                     <div className="mt-4">
                       <h4 className="text-xs font-medium text-muted-foreground mb-1">Technical Features:</h4>
                       <ul className="list-disc pl-6 space-y-1 text-sm">
-                        <li>Compliant with ERC-721/ERC-1155 token standards</li>
+                        {contractData.standards?.includes("ERC-721") && <li>Compliant with ERC-721 token standard</li>}
+                        {contractData.standards?.includes("ERC-1155") && <li>Compliant with ERC-1155 token standard</li>}
+                        {contractData.standards?.includes("ERC-20") && <li>Compliant with ERC-20 token standard</li>}
                         <li>Access control mechanisms for rights management</li>
-                        <li>Revenue distribution through on-chain calculation</li>
-                        <li>Licensing functionality with time-based controls</li>
+                        {(contractData.title === "RevenueSplit" || contractData.title === "StreamingPayouts") && 
+                          <li>Revenue distribution through on-chain calculation</li>}
+                        {contractData.title === "Licensing" && 
+                          <li>Licensing functionality with time-based controls</li>}
                         <li>Cross-chain compatibility for multiple networks</li>
                       </ul>
                     </div>
