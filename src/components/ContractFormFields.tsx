@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { X, Plus, Users, Wallet, Trash } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface ContractFormFieldsProps {
   contractType: "FilmRights" | "RevenueSplit" | "Investment" | "Licensing" | "StreamingPayouts" | "Custom";
@@ -20,16 +21,42 @@ interface Stakeholder {
   walletId: string;
 }
 
+interface Contributor {
+  name: string;
+  role: string;
+}
+
+interface PreviousRightsHolder {
+  holder: string;
+  period: string;
+  description: string;
+}
+
 export const CONTRACT_TYPE_CONFIGS = {
   FilmRights: {
     title: "Film Rights Contract",
     description: "Manages ownership of IP, assigns revenue shares",
     fields: [
-      { name: "contentTitle", label: "Content Title", type: "text", required: true },
-      { name: "rightsOwner", label: "Rights Owner", type: "text", required: true },
-      { name: "transferable", label: "Transferable Rights", type: "checkbox" },
-      { name: "exclusivity", label: "Exclusivity Terms", type: "textarea" },
-      { name: "licenseDuration", label: "License Duration (in months)", type: "number" },
+      { name: "title", label: "Film Title", type: "text", required: true },
+      { name: "description", label: "Film Description", type: "textarea", required: true },
+      { name: "assetId", label: "Asset ID", type: "text", required: true },
+      { name: "contentURI", label: "Content URI", type: "text", required: true },
+      { name: "contentType", label: "Content Type", type: "select", required: true, 
+        options: ["feature film", "documentary", "short film", "music video", "other"] },
+      { name: "creationDate", label: "Creation Date", type: "date", required: true },
+      { name: "rightsHolder", label: "Rights Holder", type: "text", required: true },
+      { name: "duration", label: "Duration", type: "text", required: true, placeholder: "e.g., 1h 35m" },
+      { name: "genre", label: "Genres", type: "array", itemLabel: "Genre" },
+      { name: "contributors", label: "Contributors", type: "contributors" },
+      { name: "language", label: "Primary Language", type: "text" },
+      { name: "country", label: "Country of Origin", type: "text" },
+      { name: "copyright", label: "Copyright Information", type: "text" },
+      { name: "thumbnailImage", label: "Thumbnail Image URI", type: "text" },
+      { name: "territories", label: "Territories", type: "array", itemLabel: "Territory", 
+        description: "Territories where rights are applicable" },
+      { name: "restrictions", label: "Restrictions", type: "array", itemLabel: "Restriction", 
+        description: "Any restrictions on the use of the asset" },
+      { name: "previousRights", label: "Previous Rights Holders", type: "previousRights" }
     ]
   },
   RevenueSplit: {
@@ -115,7 +142,49 @@ const ContractFormFields = ({ contractType, onChange, initialData = {} }: Contra
     walletId: ""
   });
   
+  // Add state for contributors
+  const [contributors, setContributors] = useState<Contributor[]>(
+    initialData.contributors || []
+  );
+  const [newContributor, setNewContributor] = useState<Contributor>({
+    name: "",
+    role: ""
+  });
+  
+  // Add state for previous rights holders
+  const [previousRights, setPreviousRights] = useState<PreviousRightsHolder[]>(
+    initialData.previousRights || []
+  );
+  const [newPreviousRight, setNewPreviousRight] = useState<PreviousRightsHolder>({
+    holder: "",
+    period: "",
+    description: ""
+  });
+  
   const [newItems, setNewItems] = useState<Record<string, string>>({});
+  
+  useEffect(() => {
+    // Initialize complex data fields when contract type changes
+    if (contractType === "FilmRights") {
+      // Initialize contributors
+      if (!formData.contributors) {
+        setContributors([]);
+      }
+      
+      // Initialize territories, restrictions, previousRights
+      if (!formData.territories) {
+        setArrayFields(prev => ({ ...prev, territories: [] }));
+      }
+      
+      if (!formData.restrictions) {
+        setArrayFields(prev => ({ ...prev, restrictions: [] }));
+      }
+      
+      if (!formData.previousRights) {
+        setPreviousRights([]);
+      }
+    }
+  }, [contractType, formData]);
   
   const handleInputChange = (fieldName: string, value: any) => {
     const updatedData = { ...formData, [fieldName]: value };
@@ -183,6 +252,70 @@ const ContractFormFields = ({ contractType, onChange, initialData = {} }: Contra
     setNewStakeholder({ ...newStakeholder, [field]: value });
   };
   
+  // Handlers for contributors
+  const handleAddContributor = () => {
+    if (!newContributor.name || !newContributor.role) {
+      return;
+    }
+    
+    const updatedContributors = [...contributors, newContributor];
+    setContributors(updatedContributors);
+    setNewContributor({ name: "", role: "" });
+    
+    // Update the main form data
+    const updatedData = { ...formData, contributors: updatedContributors };
+    setFormData(updatedData);
+    onChange(updatedData);
+  };
+  
+  const handleRemoveContributor = (index: number) => {
+    const updatedContributors = [...contributors];
+    updatedContributors.splice(index, 1);
+    
+    setContributors(updatedContributors);
+    
+    // Update the main form data
+    const updatedData = { ...formData, contributors: updatedContributors };
+    setFormData(updatedData);
+    onChange(updatedData);
+  };
+  
+  const handleContributorChange = (field: keyof Contributor, value: string) => {
+    setNewContributor({ ...newContributor, [field]: value });
+  };
+  
+  // Handlers for previous rights holders
+  const handleAddPreviousRight = () => {
+    if (!newPreviousRight.holder || !newPreviousRight.period) {
+      return;
+    }
+    
+    const updatedPreviousRights = [...previousRights, newPreviousRight];
+    setPreviousRights(updatedPreviousRights);
+    setNewPreviousRight({ holder: "", period: "", description: "" });
+    
+    // Update the main form data
+    const updatedData = { ...formData, previousRights: updatedPreviousRights };
+    setFormData(updatedData);
+    onChange(updatedData);
+  };
+  
+  const handleRemovePreviousRight = (index: number) => {
+    const updatedPreviousRights = [...previousRights];
+    updatedPreviousRights.splice(index, 1);
+    
+    setPreviousRights(updatedPreviousRights);
+    
+    // Update the main form data
+    const updatedData = { ...formData, previousRights: updatedPreviousRights };
+    setFormData(updatedData);
+    onChange(updatedData);
+  };
+  
+  const handlePreviousRightChange = (field: keyof PreviousRightsHolder, value: string) => {
+    setNewPreviousRight({ ...newPreviousRight, [field]: value });
+  };
+  
   const config = CONTRACT_TYPE_CONFIGS[contractType];
   
   return (
@@ -210,6 +343,7 @@ const ContractFormFields = ({ contractType, onChange, initialData = {} }: Contra
                   onChange={(e) => handleInputChange(field.name, e.target.value)}
                   required={field.required}
                   className="min-h-[100px]"
+                  placeholder={field.placeholder}
                 />
               </div>
             );
@@ -240,21 +374,21 @@ const ContractFormFields = ({ contractType, onChange, initialData = {} }: Contra
                   {field.label}
                   {field.required && <span className="text-destructive ml-1">*</span>}
                 </Label>
-                <select
-                  id={field.name}
-                  name={field.name}
+                <Select
                   value={formData[field.name] || ""}
-                  onChange={(e) => handleInputChange(field.name, e.target.value)}
-                  required={field.required}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  onValueChange={(value) => handleInputChange(field.name, value)}
                 >
-                  <option value="">Select {field.label}</option>
-                  {field.options?.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger>
+                    <SelectValue placeholder={`Select ${field.label}`} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {field.options?.map((option) => (
+                      <SelectItem key={option} value={option}>
+                        {option}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             );
           }
@@ -356,7 +490,12 @@ const ContractFormFields = ({ contractType, onChange, initialData = {} }: Contra
               <div key={key} className="col-span-1 md:col-span-2">
                 <Label htmlFor={field.name} className="mb-2 block text-muted-foreground">
                   {field.label}
+                  {field.required && <span className="text-destructive ml-1">*</span>}
                 </Label>
+                
+                {field.description && (
+                  <p className="text-xs text-muted-foreground mb-2">{field.description}</p>
+                )}
                 
                 <div className="space-y-2 mb-2">
                   {arrayFields[field.name]?.map((item, index) => (
@@ -405,6 +544,171 @@ const ContractFormFields = ({ contractType, onChange, initialData = {} }: Contra
             );
           }
           
+          if (field.type === "contributors") {
+            return (
+              <div key={key} className="col-span-1 md:col-span-2">
+                <Label htmlFor={field.name} className="mb-2 block text-muted-foreground">
+                  {field.label}
+                  {field.required && <span className="text-destructive ml-1">*</span>}
+                </Label>
+                
+                <div className="border rounded-md p-4 space-y-4">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[250px]">Name</TableHead>
+                        <TableHead>Role</TableHead>
+                        <TableHead className="w-[80px]">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {contributors.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={3} className="text-center py-4 text-muted-foreground">
+                            No contributors added yet
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        contributors.map((contributor, index) => (
+                          <TableRow key={index}>
+                            <TableCell>{contributor.name}</TableCell>
+                            <TableCell>{contributor.role}</TableCell>
+                            <TableCell>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleRemoveContributor(index)}
+                                className="h-8 w-8 p-0"
+                              >
+                                <Trash className="h-4 w-4 text-destructive" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="flex items-center gap-2">
+                      <Users size={16} className="text-muted-foreground" />
+                      <Input
+                        placeholder="Contributor Name"
+                        value={newContributor.name}
+                        onChange={(e) => handleContributorChange("name", e.target.value)}
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        placeholder="Role (e.g., Director, Producer)"
+                        value={newContributor.role}
+                        onChange={(e) => handleContributorChange("role", e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  
+                  <Button
+                    type="button"
+                    onClick={handleAddContributor}
+                    className="w-full bg-accent hover:bg-accent/90"
+                    disabled={!newContributor.name || !newContributor.role}
+                  >
+                    <Plus className="h-4 w-4 mr-1" />
+                    Add Contributor
+                  </Button>
+                </div>
+              </div>
+            );
+          }
+          
+          if (field.type === "previousRights") {
+            return (
+              <div key={key} className="col-span-1 md:col-span-2">
+                <Label htmlFor={field.name} className="mb-2 block text-muted-foreground">
+                  {field.label}
+                  {field.required && <span className="text-destructive ml-1">*</span>}
+                </Label>
+                
+                <div className="border rounded-md p-4 space-y-4">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[200px]">Previous Holder</TableHead>
+                        <TableHead className="w-[150px]">Period</TableHead>
+                        <TableHead>Description</TableHead>
+                        <TableHead className="w-[80px]">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {previousRights.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={4} className="text-center py-4 text-muted-foreground">
+                            No previous rights holders added yet
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        previousRights.map((right, index) => (
+                          <TableRow key={index}>
+                            <TableCell>{right.holder}</TableCell>
+                            <TableCell>{right.period}</TableCell>
+                            <TableCell>{right.description}</TableCell>
+                            <TableCell>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleRemovePreviousRight(index)}
+                                className="h-8 w-8 p-0"
+                              >
+                                <Trash className="h-4 w-4 text-destructive" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div className="flex items-center gap-2">
+                      <Input
+                        placeholder="Previous Rights Holder"
+                        value={newPreviousRight.holder}
+                        onChange={(e) => handlePreviousRightChange("holder", e.target.value)}
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        placeholder="Period (e.g., 2018-2022)"
+                        value={newPreviousRight.period}
+                        onChange={(e) => handlePreviousRightChange("period", e.target.value)}
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        placeholder="Description (optional)"
+                        value={newPreviousRight.description}
+                        onChange={(e) => handlePreviousRightChange("description", e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  
+                  <Button
+                    type="button"
+                    onClick={handleAddPreviousRight}
+                    className="w-full bg-accent hover:bg-accent/90"
+                    disabled={!newPreviousRight.holder || !newPreviousRight.period}
+                  >
+                    <Plus className="h-4 w-4 mr-1" />
+                    Add Previous Rights Holder
+                  </Button>
+                </div>
+              </div>
+            );
+          }
+          
+          // Default case: text input
           return (
             <div key={key}>
               <Input
@@ -415,6 +719,7 @@ const ContractFormFields = ({ contractType, onChange, initialData = {} }: Contra
                 value={formData[field.name] || ""}
                 onChange={(e) => handleInputChange(field.name, e.target.value)}
                 required={field.required}
+                placeholder={field.placeholder}
               />
             </div>
           );
